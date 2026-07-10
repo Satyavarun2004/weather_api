@@ -1,0 +1,215 @@
+{% extends 'weather_app/base.html' %}
+
+{% block title %}Dashboard - WeatherLogger{% endblock %}
+
+
+
+{% block content %}
+<div class="row g-4">
+    <!-- Left Column: Search & Live Result -->
+    <div class="col-lg-7">
+        <!-- Weather Search Card -->
+        <div class="glass-card mb-4">
+            <h3 class="fw-bold mb-3"><i class="fa-solid fa-magnifying-glass-location me-2 text-primary"></i>Check Weather</h3>
+            <form method="GET" action="{% url 'home' %}">
+                <div class="input-group">
+                    <input type="text" name="q" class="form-control form-control-custom" placeholder="Enter City Name (e.g., Bangalore, London)" value="{{ city_query }}" required>
+                    <button class="btn btn-custom px-4" type="submit">
+                        <i class="fa-solid fa-search me-1"></i>Search
+                    </button>
+                </div>
+            </form>
+            {% if api_error %}
+                <div class="alert alert-danger alert-custom alert-error-custom mt-3 mb-0" role="alert">
+                    <i class="fa-solid fa-circle-exclamation me-2"></i>{{ api_error }}
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Live Weather Report -->
+        {% if search_result %}
+            <div class="glass-card">
+                <div class="d-flex justify-content-between align-items-start mb-4">
+                    <div>
+                        <h2 class="fw-bold mb-0">{{ search_result.city }}</h2>
+                        <p class="text-white-50 mb-0"><i class="fa-solid fa-earth-americas me-1"></i>{{ search_result.country }}</p>
+                    </div>
+                    <span class="badge bg-success-subtle text-success border border-success-subtle px-3 py-2 rounded-pill">
+                        <i class="fa-solid fa-cloud-arrow-up me-1"></i>Logged in MySQL
+                    </span>
+                </div>
+
+                <div class="row align-items-center mb-4">
+                    <div class="col-sm-7 d-flex align-items-center gap-3">
+                        <div class="weather-giant-temp">{{ search_result.temperature|floatformat:0 }}°C</div>
+                        <div>
+                            <div class="fw-bold fs-5 text-white">{{ search_result.condition }}</div>
+                            <div class="text-white-50">Feels like {{ search_result.feels_like|floatformat:1 }}°C</div>
+                        </div>
+                    </div>
+                    <div class="col-sm-5 text-sm-end text-center mt-3 mt-sm-0">
+                        <!-- Dynamic Weather Icon Selection -->
+                        {% if 'sun' in search_result.condition|lower or 'clear' in search_result.condition|lower %}
+                            <i class="fa-solid fa-sun text-warning weather-icon-giant"></i>
+                        {% elif 'rain' in search_result.condition|lower or 'drizzle' in search_result.condition|lower or 'shower' in search_result.condition|lower %}
+                            <i class="fa-solid fa-cloud-showers-heavy text-info weather-icon-giant"></i>
+                        {% elif 'snow' in search_result.condition|lower or 'sleet' in search_result.condition|lower or 'ice' in search_result.condition|lower %}
+                            <i class="fa-solid fa-snowflake text-primary weather-icon-giant"></i>
+                        {% elif 'thunder' in search_result.condition|lower or 'storm' in search_result.condition|lower %}
+                            <i class="fa-solid fa-cloud-bolt text-danger weather-icon-giant"></i>
+                        {% else %}
+                            <i class="fa-solid fa-cloud text-secondary weather-icon-giant"></i>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <hr style="border-color: var(--glass-border);" class="my-4">
+
+                <!-- Advanced Weather Indicators Grid -->
+                <div class="row g-3">
+                    <div class="col-6 col-sm-4">
+                        <div class="info-badge">
+                            <i class="fa-solid fa-droplet text-info"></i>
+                            <div>
+                                <div class="text-white-50" style="font-size: 0.8rem;">Humidity</div>
+                                <div class="fw-bold">{{ search_result.humidity }}%</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-sm-4">
+                        <div class="info-badge">
+                            <i class="fa-solid fa-wind text-warning"></i>
+                            <div>
+                                <div class="text-white-50" style="font-size: 0.8rem;">Wind Speed</div>
+                                <div class="fw-bold">{{ search_result.wind_speed }} km/h</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-sm-4">
+                        <div class="info-badge">
+                            <i class="fa-solid fa-gauge-high text-success"></i>
+                            <div>
+                                <div class="text-white-50" style="font-size: 0.8rem;">Pressure</div>
+                                <div class="fw-bold">{{ search_result.pressure|floatformat:0 }} mb</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-sm-4">
+                        <div class="info-badge">
+                            <i class="fa-solid fa-eye text-primary"></i>
+                            <div>
+                                <div class="text-white-50" style="font-size: 0.8rem;">Visibility</div>
+                                <div class="fw-bold">{{ search_result.visibility }} km</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-sm-4">
+                        <div class="info-badge">
+                            <i class="fa-solid fa-circle-radiation text-danger"></i>
+                            <div>
+                                <div class="text-white-50" style="font-size: 0.8rem;">UV Index</div>
+                                <div class="fw-bold">{{ search_result.uv_index }}</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-sm-4">
+                        <div class="info-badge">
+                            <i class="fa-solid fa-clock text-secondary"></i>
+                            <div>
+                                <div class="text-white-50" style="font-size: 0.8rem;">Logged At</div>
+                                <div class="fw-bold" style="font-size: 0.95rem;">{{ search_result.search_time }}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% else %}
+            <!-- Initial Blank State Welcome Dashboard -->
+            <div class="glass-card text-center py-5">
+                <i class="fa-solid fa-cloud-sun-rain fa-4x text-primary mb-4" style="background: var(--accent-glow); -webkit-background-clip: text; -webkit-text-fill-color: transparent;"></i>
+                <h4 class="fw-bold">No active search</h4>
+                <p class="text-white-50 mb-0">Use the input bar above to query and log weather info from WeatherAPI.</p>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Right Column: Stats & Last Search Summary -->
+    <div class="col-lg-5">
+        <!-- Live MySQL Stats Card -->
+        <div class="glass-card mb-4">
+            <h3 class="fw-bold mb-4"><i class="fa-solid fa-database me-2 text-primary"></i>My Statistics</h3>
+            
+            <div class="row g-3">
+                <div class="col-6">
+                    <div class="stat-card">
+                        <div class="text-white-50 mb-1" style="font-size: 0.85rem;"><i class="fa-solid fa-magnifying-glass me-1"></i>Total Searches</div>
+                        <div class="fs-3 fw-bold text-white">{{ total_searches }}</div>
+                    </div>
+                </div>
+                <div class="col-6">
+                    <div class="stat-card">
+                        <div class="text-white-50 mb-1" style="font-size: 0.85rem;"><i class="fa-solid fa-temperature-three-quarters me-1"></i>Average Temp</div>
+                        <div class="fs-3 fw-bold text-white">
+                            {% if avg_temp %}
+                                {{ avg_temp|floatformat:1 }}°C
+                            {% else %}
+                                N/A
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                <div class="col-6">
+                    <div class="stat-card">
+                        <div class="text-white-50 mb-1" style="font-size: 0.85rem;"><i class="fa-solid fa-fire text-danger me-1"></i>Hottest City</div>
+                        <div class="fw-bold text-white" style="font-size: 1.1rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                            {% if hottest_report %}
+                                {{ hottest_report.city }} ({{ hottest_report.temperature|floatformat:0 }}°C)
+                            {% else %}
+                                N/A
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                <div class="col-6">
+                    <div class="stat-card">
+                        <div class="text-white-50 mb-1" style="font-size: 0.85rem;"><i class="fa-solid fa-snowflake text-primary me-1"></i>Coldest City</div>
+                        <div class="fw-bold text-white" style="font-size: 1.1rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                            {% if coldest_report %}
+                                {{ coldest_report.city }} ({{ coldest_report.temperature|floatformat:0 }}°C)
+                            {% else %}
+                                N/A
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Last Weather Search Summary Card -->
+        <div class="glass-card">
+            <h3 class="fw-bold mb-3"><i class="fa-solid fa-history me-2 text-primary"></i>Last Search Summary</h3>
+            {% if last_search %}
+                <div class="p-3 rounded-4" style="background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.04);">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="fw-bold fs-5 text-white">{{ last_search.city }}</span>
+                        <span class="badge bg-primary-subtle text-primary border border-primary-subtle">{{ last_search.temperature|floatformat:0 }}°C</span>
+                    </div>
+                    <div class="text-white-50" style="font-size: 0.9rem;">
+                        <div>Condition: {{ last_search.condition }}</div>
+                        <div>Humidity: {{ last_search.humidity }}% | Wind: {{ last_search.wind_speed }} km/h</div>
+                        <div class="mt-2 text-white-25" style="font-size: 0.75rem;">Searched: {{ last_search.search_date }} at {{ last_search.search_time }}</div>
+                    </div>
+                </div>
+                <a href="{% url 'history' %}" class="btn btn-secondary-custom w-100 mt-3 py-2 text-center text-decoration-none d-block">
+                    <i class="fa-solid fa-list me-1"></i>View Full History
+                </a>
+            {% else %}
+                <div class="text-center py-4 text-white-50">
+                    <i class="fa-solid fa-database-arrow-up mb-2 fa-2x"></i>
+                    <div>No search history available.</div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

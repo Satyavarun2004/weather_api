@@ -1,0 +1,103 @@
+{% extends 'weather_app/base.html' %}
+
+{% block title %}Search History - WeatherLogger{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-10">
+        <div class="glass-card">
+            <!-- Header Controls -->
+            <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-3 mb-4">
+                <div>
+                    <h2 class="fw-bold mb-1"><i class="fa-solid fa-clock-rotate-left me-2 text-primary"></i>Weather Search History</h2>
+                    <p class="text-white-50 mb-0">Manage and export your logged weather records</p>
+                </div>
+                
+                {% if history_records %}
+                    <div class="d-flex align-items-center gap-2">
+                        <!-- Export Button -->
+                        <a href="{% url 'export_history' %}" class="btn btn-custom px-3 py-2 text-decoration-none">
+                            <i class="fa-solid fa-file-arrow-down me-1"></i>Export History
+                        </a>
+                        
+                        <!-- Clear History Form Trigger -->
+                        <form method="POST" action="{% url 'clear_history' %}" onsubmit="return confirm('Are you sure you want to permanently delete all your weather search records?');">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-danger py-2 px-3" style="border-radius: 12px; font-weight: 600;">
+                                <i class="fa-solid fa-trash-can me-1"></i>Clear History
+                            </button>
+                        </form>
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- Table View -->
+            {% if history_records %}
+                <div class="table-responsive" style="border-radius: 12px; border: 1px solid var(--glass-border); background: rgba(0,0,0,0.15);">
+                    <table class="table table-dark table-hover mb-0 align-middle">
+                        <thead>
+                            <tr style="border-bottom: 2px solid var(--glass-border);">
+                                <th scope="col" class="ps-3 py-3 text-white-50">ID</th>
+                                <th scope="col" class="py-3 text-white-50">City</th>
+                                <th scope="col" class="py-3 text-white-50">Country</th>
+                                <th scope="col" class="py-3 text-white-50">Temperature</th>
+                                <th scope="col" class="py-3 text-white-50">Condition</th>
+                                <th scope="col" class="py-3 text-white-50">Date</th>
+                                <th scope="col" class="py-3 text-white-50">Time</th>
+                                <th scope="col" class="pe-3 py-3 text-end text-white-50">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for record in history_records %}
+                                <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                                    <td class="ps-3 py-3 fw-bold text-white-50">{{ record.id }}</td>
+                                    <td class="py-3 fw-bold text-white">{{ record.city }}</td>
+                                    <td class="py-3 text-white-50">{{ record.country }}</td>
+                                    <td class="py-3">
+                                        <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-2 py-1.5" style="font-size: 0.9rem;">
+                                            {{ record.temperature|floatformat:1 }}°C
+                                        </span>
+                                    </td>
+                                    <td class="py-3">
+                                        {% if 'sun' in record.condition|lower or 'clear' in record.condition|lower %}
+                                            <i class="fa-solid fa-sun text-warning me-1"></i>
+                                        {% elif 'rain' in record.condition|lower or 'drizzle' in record.condition|lower or 'shower' in record.condition|lower %}
+                                            <i class="fa-solid fa-cloud-showers-heavy text-info me-1"></i>
+                                        {% elif 'snow' in record.condition|lower or 'sleet' in record.condition|lower or 'ice' in record.condition|lower %}
+                                            <i class="fa-solid fa-snowflake text-primary me-1"></i>
+                                        {% elif 'thunder' in record.condition|lower or 'storm' in record.condition|lower %}
+                                            <i class="fa-solid fa-cloud-bolt text-danger me-1"></i>
+                                        {% else %}
+                                            <i class="fa-solid fa-cloud text-secondary me-1"></i>
+                                        {% endif %}
+                                        {{ record.condition }}
+                                    </td>
+                                    <td class="py-3 text-white-50" style="font-size: 0.95rem;">{{ record.search_date }}</td>
+                                    <td class="py-3 text-white-50" style="font-size: 0.95rem;">{{ record.search_time }}</td>
+                                    <td class="pe-3 py-3 text-end">
+                                        <a href="{% url 'edit_record' record.id %}" class="btn btn-outline-primary btn-sm px-2.5 py-1.5 me-1" style="border-radius: 8px;">
+                                            <i class="fa-solid fa-pen"></i>
+                                        </a>
+                                        <a href="{% url 'delete_record' record.id %}" class="btn btn-outline-danger btn-sm px-2.5 py-1.5" style="border-radius: 8px;" onclick="return confirm('Remove search log for {{ record.city }}?');">
+                                            <i class="fa-solid fa-trash"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="text-center py-5 text-white-50">
+                    <i class="fa-solid fa-history fa-3x mb-3" style="color: var(--text-secondary);"></i>
+                    <h4 class="fw-bold">No history logged yet</h4>
+                    <p class="mb-3">Start searching for weather details from your dashboard to record data.</p>
+                    <a href="{% url 'home' %}" class="btn btn-custom py-2 px-4 text-decoration-none">
+                        <i class="fa-solid fa-house-laptop me-1"></i>Go to Dashboard
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

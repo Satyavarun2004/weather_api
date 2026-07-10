@@ -1,0 +1,51 @@
+{% extends 'weather_app/base.html' %}
+
+{% block title %}Login - WeatherLogger{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center align-items-center" style="min-height: 60vh;">
+    <div class="col-md-5">
+        <div class="glass-card text-center">
+            <div class="mb-4">
+                <i class="fa-solid fa-lock-open fa-3x mb-3 text-primary" style="background: var(--accent-glow); -webkit-background-clip: text; -webkit-text-fill-color: transparent;"></i>
+                <h2 class="fw-bold mb-1">Account Login</h2>
+                <p class="text-white-50">Log in to track your personal weather logs</p>
+            </div>
+            
+            <form method="POST" action="{% url 'login' %}">
+                {% csrf_token %}
+                <div class="mb-3 text-start">
+                    <label for="username" class="form-label text-white-50">Username</label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-transparent" style="border-color: var(--glass-border); color: var(--text-secondary);">
+                            <i class="fa-solid fa-user"></i>
+                        </span>
+                        <input type="text" name="username" id="username" class="form-control form-control-custom" placeholder="Enter your username" required autocomplete="username">
+                    </div>
+                </div>
+                
+                <div class="mb-4 text-start">
+                    <label for="password" class="form-label text-white-50">Password</label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-transparent" style="border-color: var(--glass-border); color: var(--text-secondary);">
+                            <i class="fa-solid fa-key"></i>
+                        </span>
+                        <input type="password" name="password" id="password" class="form-control form-control-custom" placeholder="Enter your password" required autocomplete="current-password">
+                    </div>
+                </div>
+                
+                <button type="submit" class="btn btn-custom w-100 mb-3">
+                    <i class="fa-solid fa-right-to-bracket me-2"></i>Sign In
+                </button>
+            </form>
+            
+            <hr style="border-color: var(--glass-border);" class="my-4">
+            
+            <p class="mb-0 text-white-50">
+                Don't have an account? 
+                <a href="{% url 'register' %}" class="text-decoration-none fw-bold" style="color: #a855f7;">Register here</a>
+            </p>
+        </div>
+    </div>
+</div>
+{% endblock %}
